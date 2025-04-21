@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Signup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    .container h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .form-group button:hover {
+      background-color: #0056b3;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+      text-align: center;
+    }
+    .toggle-link {
+      text-align: center;
+      margin-top: 10px;
+      cursor: pointer;
+      color: #007bff;
+    }
+    .toggle-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="form-title">Login</h1>
+    <div id="error" class="error"></div>
+    <div id="login-form">
+      <div class="form-group">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" placeholder="Enter your username">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="Enter your password">
+      </div>
+      <div class="form-group">
+        <button onclick="login()">Login</button>
+      </div>
+    </div>
+    <div id="signup-form" style="display: none;">
+      <div class="form-group">
+        <label for="signup-username">Username</label>
+        <input type="text" id="signup-username" placeholder="Enter your username">
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="Enter your password">
+      </div>
+      <div class="form-group">
+        <button onclick="signup()">Signup</button>
+      </div>
+    </div>
+    <div class="toggle-link" onclick="toggleForm()">Don't have an account? Signup</div>
+  </div>
+
+  <script>
+    let isLogin = true;
+
+    function toggleForm() {
+      isLogin = !isLogin;
+      document.getElementById('form-title').textContent = isLogin ? 'Login' : 'Signup';
+      document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('signup-form').style.display = isLogin ? 'none' : 'block';
+      document.querySelector('.toggle-link').textContent = isLogin
+        ? "Don't have an account? Signup"
+        : "Already have an account? Login";
+    }
+
+    async function login() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const errorDiv = document.getElementById('error');
+
+      if (!username || !password) {
+        errorDiv.textContent = 'Please fill in all fields.';
+        return;
+      }
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Login successful!');
+          window.location.href = '/index.html';
+        } else {
+          errorDiv.textContent = data.error || 'Login failed.';
+        }
+      } catch (err) {
+        console.error(err);
+        errorDiv.textContent = 'An error occurred. Please try again.';
+      }
+    }
+
+    async function signup() {
+      const username = document.getElementById('signup-username').value;
+      const password = document.getElementById('signup-password').value;
+      const errorDiv = document.getElementById('error');
+
+      if (!username || !password) {
+        errorDiv.textContent = 'Please fill in all fields.';
+        return;
+      }
+
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Signup successful! You can now log in.');
+          toggleForm(); // Switch to login form
+        } else {
+          errorDiv.textContent = data.error || 'Signup failed.';
+        }
+      } catch (err) {
+        console.error(err);
+        errorDiv.textContent = 'An error occurred. Please try again.';
+      }
+    }
+  </script>
+</body>
+</html>

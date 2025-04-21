@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ping Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-color: #000000;
+      --text-color: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.8);
+      --green: #4CAF50;
+      --yellow: #FFC107;
+      --red: #F44336;
+      --gray: #757575;
+      --primary: #3498db;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 500px;
+      border: 2px solid var(--border-color);
+      border-radius: 20px;
+      padding: 25px;
+      margin-top: 20px;
+      position: relative;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    h1 {
+      font-weight: normal;
+      font-size: 2.2rem;
+    }
+    
+    .add-button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .add-button:hover {
+      transform: scale(1.1);
+      background-color: #2980b9;
+    }
+    
+    .add-form {
+      background-color: rgba(20, 20, 20, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      text-align: left;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    
+    input, button {
+      padding: 12px 15px;
+      font-size: 1rem;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background-color: #111;
+      color: white;
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    .website-list {
+      text-align: left;
+    }
+    
+    .website-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background-color 0.2s;
+      border-radius: 6px;
+    }
+    
+    .website-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .website-name {
+      font-size: 1.1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70%;
+    }
+    
+    .website-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .dot {
+      display: inline-block;
+      height: 15px;
+      width: 15px;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+    
+    .dot.pulsing {
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .green { background-color: var(--green); }
+    .yellow { background-color: var(--yellow); }
+    .red { background-color: var(--red); }
+    .gray { background-color: var(--gray); }
+    
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-button {
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+      width: auto;
+      padding: 5px;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    
+    .action-button:hover {
+      color: white;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 30px 0;
+      color: #888;
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+    
+    .control-panel {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    
+    .refresh-all {
+      background: none;
+      border: 1px solid #444;
+      color: white;
+      padding: 8px 15px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+    
+    .refresh-all:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .refresh-all.rotating i {
+      animation: rotate 1s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .stats {
+      color: #aaa;
+      font-size: 0.85rem;
+    }
+    
+    .ping-details {
+      display: none;
+      background-color: rgba(30, 30, 30, 0.95);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .detail-label {
+      color: #888;
+    }
+    
+    .status-message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      display: none;
+      z-index: 100;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid var(--primary);
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsiveness for mobile */
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .add-button {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+      
+      .website-name {
+        max-width: 60%;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Nea Server</h1>
+      <button class="add-button" onclick="toggleAddForm()" title="Add Website">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+    
+    <div class="add-form" id="addForm">
+      <div class="form-group">
+        <label for="newSiteName">Display Name (optional)</label>
+        <input type="text" id="newSiteName" placeholder="e.g., My Website">
+      </div>
+      <div class="form-group">
+        <label for="newSiteUrl">URL or IP Address</label>
+        <input type="text" id="newSiteUrl" placeholder="e.g., google.com or 8.8.8.8" required>
+      </div>
+      <div class="form-group">
+        <button onclick="addWebsite()">Add Website</button>
+      </div>
+    </div>
+    
+    <div class="control-panel" id="controlPanel" style="display: none;">
+      <button class="refresh-all" onclick="checkAllWebsites(true)">
+        <i class="fas fa-sync-alt"></i> Refresh All
+      </button>
+      <div class="stats" id="stats"></div>
+    </div>
+    
+    <div class="website-list" id="websiteList">
+      <!-- Websites will be populated here -->
+    </div>
+  </div>
+  
+  <div class="status-message" id="statusMessage"></div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // Store websites in local storage
+    const STORAGE_KEY = 'pingCheckerWebsites';
+    let websites = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let checkingInProgress = false;
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      renderWebsiteList();
+      updateStats();
+      
+      // Start checking all websites if there are any
+      if (websites.length > 0) {
+        document.getElementById('controlPanel').style.display = 'flex';
+        checkAllWebsites();
+      }
+      
+      // Set interval to check all websites every 5 minutes
+      setInterval(() => {
+        if (websites.length > 0) {
+          checkAllWebsites();
+        }
+      }, 5 * 60 * 1000);
+    });
+    
+    function toggleAddForm() {
+      const form = document.getElementById('addForm');
+      form.style.display = form.style.display === 'none' || form.style.display === '' ? 'block' : 'none';
+      if (form.style.display === 'block') {
+        document.getElementById('newSiteUrl').focus();
+      }
+    }
+    
+    function addWebsite() {
+      const urlInput = document.getElementById('newSiteUrl');
+      const nameInput = document.getElementById('newSiteName');
+      
+      const url = urlInput.value.trim();
+      let name = nameInput.value.trim();
+      
+      if (!url) {
+        showMessage('Please enter a URL or IP address');
+        return;
+      }
+      
+      // If no name provided, use the URL
+      if (!name) {
+        name = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+      }
+      
+      // Check if already exists
+      if (websites.some(site => site.url === url)) {
+        showMessage('This website is already in your list');
+        return;
+      }
+      
+      // Add to list
+      const newSite = {
+        url: url,
+        name: name,
+        status: 'checking',
+        added: new Date().toISOString(),
+        lastChecked: null,
+        history: []
+      };
+      
+      websites.push(newSite);
+      
+      // Save to storage
+      saveWebsites();
+      
+      // Clear inputs
+      urlInput.value = '';
+      nameInput.value = '';
+      
+      // Hide form
+      toggleAddForm();
+      
+      // Show control panel if this is the first website
+      if (websites.length === 1) {
+        document.getElementById('controlPanel').style.display = 'flex';
+      }
+      
+      // Render list
+      renderWebsiteList();
+      updateStats();
+      
+      // Check the new website
+      checkWebsite(websites.length - 1);
+      
+      showMessage(`Added "${name}" to monitoring`);
+    }
+    
+    function renderWebsiteList() {
+      const listElement = document.getElementById('websiteList');
+      listElement.innerHTML = '';
+      
+      if (websites.length === 0) {
+        listElement.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-globe"></i>
+            <p>No websites added yet.</p>
+            <p>Click the + button to add a website to monitor.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      websites.forEach((site, index) => {
+        const item = document.createElement('div');
+        item.className = 'website-item';
+        item.id = `website-${index}`;
+        
+        // Status dot class
+        let dotClass = 'gray';
+        let statusTitle = 'Unknown';
+        
+        if (site.status === 'checking') {
+          dotClass = 'gray pulsing';
+          statusTitle = 'Checking...';
+        } else if (site.status === 'green') {
+          dotClass = 'green';
+          statusTitle = 'Online - Good';
+        } else if (site.status === 'yellow') {
+          dotClass = 'yellow';
+          statusTitle = 'Online - Issues';
+        } else if (site.status === 'red') {
+          dotClass = 'red';
+          statusTitle = 'Offline or Unreachable';
+        }
+        
+        // Format last checked time
+        let lastCheckedStr = site.lastChecked ? formatTimeAgo(new Date(site.lastChecked)) : 'Never';
+        
+        item.innerHTML = `
+          <div class="website-name" title="${site.url}">${site.name}</div>
+          <div class="website-status">
+            <span class="dot ${dotClass}" title="${statusTitle}"></span>
+            <div class="actions">
+              <button class="action-button" onclick="toggleDetails(${index})" title="Show Details">
+                <i class="fas fa-info-circle"></i>
+              </button>
+              <button class="action-button" onclick="checkWebsite(${index}, true)" title="Check Now">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+              <button class="action-button" onclick="removeWebsite(${index})" title="Remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        
+        // Add details panel
+        const details = document.createElement('div');
+        details.className = 'ping-details';
+        details.id = `details-${index}`;
+        
+        // Fill details with data if available
+        let detailsHtml = '';
+        if (site.lastChecked) {
+          detailsHtml += `
+            <div class="detail-row">
+              <span class="detail-label">Last Checked:</span>
+              <span>${new Date(site.lastChecked).toLocaleString()}</span>
+            </div>
+          `;
+          
+          if (site.packetLoss !== undefined) {
+            detailsHtml += `
+              <div class="detail-row">
+                <span class="detail-label">Packet Loss:</span>
+                <span>${site.packetLoss}%</span>
+              </div>
+            `;
+          }
+          
+          if (site.responseTime !== undefined) {
+            detailsHtml += `
+              <div class="detail-row">
+                <span class="detail-label">Response Time:</span>
+                <span>${site.responseTime} ms</span>
+              </div>
+            `;
+          }
+        } else {
+          detailsHtml = '<p>No data available yet</p>';
+        }
+        
+        details.innerHTML = detailsHtml;
+        item.appendChild(details);
+        
+        listElement.appendChild(item);
+      });
+    }
+    
+    function toggleDetails(index) {
+      const detailsPanel = document.getElementById(`details-${index}`);
+      if (detailsPanel.style.display === 'block') {
+        detailsPanel.style.display = 'none';
+      } else {
+        // Hide all other detail panels
+        document.querySelectorAll('.ping-details').forEach(panel => {
+          panel.style.display = 'none';
+        });
+        detailsPanel.style.display = 'block';
+      }
+    }
+    
+    function saveWebsites() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(websites));
+    }
+    
+    function removeWebsite(index) {
+      const site = websites[index];
+      if (confirm(`Remove "${site.name}" from monitoring?`)) {
+        websites.splice(index, 1);
+        saveWebsites();
+        renderWebsiteList();
+        updateStats();
+        
+        // Hide control panel if no websites left
+        if (websites.length === 0) {
+          document.getElementById('controlPanel').style.display = 'none';
+        }
+        
+        showMessage(`Removed "${site.name}" from monitoring`);
+      }
+    }
+    
+    async function checkWebsite(index, userInitiated = false) {
+      const site = websites[index];
+      
+      // Update status to checking
+      site.status = 'checking';
+      renderWebsiteList();
+      
+      if (userInitiated) {
+        showMessage(`Checking "${site.name}"...`);
+      }
+      
+      try {
+        const res = await fetch(`/ping?url=${encodeURIComponent(site.url)}`);
+        const data = await res.json();
+        
+        site.lastChecked = new Date().toISOString();
+        
+        if (data.status === 'up') {
+          site.status = data.dot || 'gray';
+          site.packetLoss = data.packetLoss;
+          site.responseTime = data.responseTime;
+          
+          // Add to history (keep last 10 entries)
+          site.history = site.history || [];
+          site.history.unshift({
+            timestamp: site.lastChecked,
+            status: site.status,
+            packetLoss: site.packetLoss,
+            responseTime: site.responseTime
+          });
+          
+          if (site.history.length > 10) {
+            site.history = site.history.slice(0, 10);
+          }
+          
+          if (userInitiated) {
+            let statusMsg = `"${site.name}" is online`;
+            if (site.status === 'yellow') {
+              statusMsg += ' (with some packet loss)';
+            }
+            showMessage(statusMsg);
+          }
+        } else {
+          site.status = 'red';
+          site.error = data.error;
+          
+          // Add to history
+          site.history = site.history || [];
+          site.history.unshift({
+            timestamp: site.lastChecked,
+            status: 'red',
+            error: data.error
+          });
+          
+          if (site.history.length > 10) {
+            site.history = site.history.slice(0, 10);
+          }
+          
+          if (userInitiated) {
+            showMessage(`"${site.name}" appears to be down`);
+          }
+        }
+      } catch (err) {
+        site.status = 'red';
+        site.error = 'Connection error';
+        site.lastChecked = new Date().toISOString();
+        
+        console.error(`Error checking ${site.url}:`, err);
+        
+        if (userInitiated) {
+          showMessage(`Error checking "${site.name}"`);
+        }
+      }
+      
+      saveWebsites();
+      renderWebsiteList();
+      updateStats();
+    }
+    
+    async function checkAllWebsites(userInitiated = false) {
+      if (checkingInProgress) return;
+      checkingInProgress = true;
+      
+      if (userInitiated) {
+        showLoading(true);
+        const refreshBtn = document.querySelector('.refresh-all');
+        refreshBtn.classList.add('rotating');
+      }
+      
+      for (let i = 0; i < websites.length; i++) {
+        // Add a small delay between checks to prevent overwhelming the server
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await checkWebsite(i);
+      }
+      
+      if (userInitiated) {
+        showLoading(false);
+        const refreshBtn = document.querySelector('.refresh-all');
+        refreshBtn.classList.remove('rotating');
+        showMessage('All websites checked');
+      }
+      
+      checkingInProgress = false;
+    }
+    
+    function updateStats() {
+      const statsEl = document.getElementById('stats');
+      if (!statsEl) return;
+      
+      if (websites.length === 0) {
+        statsEl.textContent = '';
+        return;
+      }
+      
+      // Count status
+      const counts = {
+        up: websites.filter(site => site.status === 'green').length,
+        issues: websites.filter(site => site.status === 'yellow').length,
+        down: websites.filter(site => site.status === 'red').length,
+        unknown: websites.filter(site => site.status !== 'green' && site.status !== 'yellow' && site.status !== 'red').length
+      };
+      
+      statsEl.textContent = `${websites.length} sites • ${counts.up} up • ${counts.issues} issues • ${counts.down} down`;
+    }
+    
+    function showMessage(message) {
+      const msgEl = document.getElementById('statusMessage');
+      msgEl.textContent = message;
+      msgEl.style.display = 'block';
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        msgEl.style.display = 'none';
+      }, 3000);
+    }
+    
+    function showLoading(show) {
+      const overlay = document.getElementById('loadingOverlay');
+      overlay.style.display = show ? 'flex' : 'none';
+    }
+    
+    function formatTimeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      
+      let interval = Math.floor(seconds / 31536000);
+      if (interval > 1) return interval + ' years ago';
+      
+      interval = Math.floor(seconds / 2592000);
+      if (interval > 1) return interval + ' months ago';
+      
+      interval = Math.floor(seconds / 86400);
+      if (interval > 1) return interval + ' days ago';
+      
+      interval = Math.floor(seconds / 3600);
+      if (interval > 1) return interval + ' hours ago';
+      
+      interval = Math.floor(seconds / 60);
+      if (interval > 1) return interval + ' minutes ago';
+      
+      if (seconds < 10) return 'just now';
+      
+      return Math.floor(seconds) + ' seconds ago';
+    }
+  </script>
+</body>
+</html>
